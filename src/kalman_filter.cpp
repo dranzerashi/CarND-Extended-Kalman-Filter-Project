@@ -21,13 +21,15 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
+	// Predict the new estimate
   x_=F_*x_;
 	MatrixXd Ft=F_.transpose();
+	//Predict the new uncertainity covariance matrix
 	P_=F_*P_*Ft+Q_;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  
+  // Update the state for Laser by using the given Kalman Filter Equations
 	VectorXd y=z-(H_*x_);
 	MatrixXd Ht=H_.transpose();
 	MatrixXd S=H_*P_*Ht+R_;
@@ -43,13 +45,16 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  float px=x_(0);
+  // Update the state for RADAR by using the given Kalman Filter Equations
+	
+	float px=x_(0);
 	float py=x_(1);
 	float vx=x_(2);
 	float vy=x_(3);
 	
-	float rho=sqrt(px*px+py*py);
 	
+	float rho=sqrt(px*px+py*py);
+	// If rho is too low increment it to avoid division by zero
 	rho = (rho < 0.00001) ? 0.00001 : rho;
 	
 	
@@ -59,8 +64,9 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	VectorXd H_of_x(3);
 	H_of_x<< rho,phi,radial_velocity;
 	
-	
 	VectorXd y=z-H_of_x;
+	
+	//normalize phi so that its angle is between -pi and pi
 	if(y(1) < -M_PI){
 		y(1)+= (2*M_PI);
 	}
