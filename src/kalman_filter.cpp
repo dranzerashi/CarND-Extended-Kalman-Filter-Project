@@ -21,59 +21,61 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
-  x_ = F_ * x_;
-	MatrixXd Ft = F_.transpose();
-	P_ = F_ * P_ * Ft + Q_;
+  x_=F_*x_;
+	MatrixXd Ft=F_.transpose();
+	P_=F_*P_*Ft+Q_;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  VectorXd z_pred = H_ * x_;
-	VectorXd y = z - z_pred;
-	MatrixXd Ht = H_.transpose();
-	MatrixXd S = H_ * P_ * Ht + R_;
-	MatrixXd Si = S.inverse();
-	MatrixXd PHt = P_ * Ht;
-	MatrixXd K = PHt * Si;
+  
+	VectorXd y=z-(H_*x_);
+	MatrixXd Ht=H_.transpose();
+	MatrixXd S=H_*P_*Ht+R_;
+	MatrixXd Si=S.inverse();
+	MatrixXd PHt=P_*Ht;
+	MatrixXd K=PHt*Si;
 
 	//new estimate
-	x_ = x_ + (K * y);
+	x_=x_+(K*y);
 	long x_size = x_.size();
-	MatrixXd I = MatrixXd::Identity(x_size, x_size);
-	P_ = (I - K * H_) * P_;
+	MatrixXd I=MatrixXd::Identity(x_size, x_size);
+	P_=(I-K*H_)*P_;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  float px = x_(0);
-	float py = x_(1);
-	float vx = x_(2);
-	float vy = x_(3);
+  float px=x_(0);
+	float py=x_(1);
+	float vx=x_(2);
+	float vy=x_(3);
 	
-	float rho = sqrt(px*px + py*py);
-	rho = rho < 0.0001 ? 0.0001 : rho;
+	float rho=sqrt(px*px+py*py);
 	
-	float phi = atan2(py, px);
-	float radial_velocity = (vx*px + vy*py) / rho;
+	rho = (rho < 0.00001) ? 0.00001 : rho;
+	
+	
+	float phi=atan2(py, px);
+	float radial_velocity=(vx*px+vy*py)/rho;
 	
 	VectorXd H_of_x(3);
-	H_of_x<< rho, phi, radial_velocity;
+	H_of_x<< rho,phi,radial_velocity;
 	
 	
-	VectorXd y = z - H_of_x;
-	if(y(1)<-M_PI){
-		y(1)+=2*M_PI;
+	VectorXd y=z-H_of_x;
+	if(y(1) < -M_PI){
+		y(1)+= (2*M_PI);
 	}
-	else if(y(1)>M_PI){
-		y(1)-=2*M_PI;
+	else if(y(1) > M_PI){
+		y(1)-= (2*M_PI);
 	}
-	MatrixXd Ht = H_.transpose();
-	MatrixXd S = H_ * P_ * Ht + R_;
-	MatrixXd Si = S.inverse();
-	MatrixXd PHt = P_ * Ht;
-	MatrixXd K = PHt * Si;
+	MatrixXd Ht=H_.transpose();
+	MatrixXd S=H_*P_*Ht+R_;
+	MatrixXd Si=S.inverse();
+	MatrixXd PHt=P_*Ht;
+	MatrixXd K=PHt*Si;
 
 	//new estimate
-	x_ = x_ + (K * y);
+	x_=x_+(K*y);
 	long x_size = x_.size();
-	MatrixXd I = MatrixXd::Identity(x_size, x_size);
-	P_ = (I - K * H_) * P_;
+	MatrixXd I=MatrixXd::Identity(x_size, x_size);
+	P_=(I-K*H_)*P_;
 }
