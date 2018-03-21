@@ -20,7 +20,7 @@ OUTPUT: values provided by the c++ program to the simulator
 ["rmse_vy"]
 
 ---
-[result]: ./ashi.png "Result"
+[result]: ./ashi.PNG "Result"
 ## Basic Build Instructions
 
 1. Clone this repo.
